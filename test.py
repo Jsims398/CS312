@@ -1,3 +1,7 @@
+# List of 4 coordinates
+left_coords = [(1, 2), (2, 3)]
+right_coords = [(4, 5), (5, 2)]
+
 def find_upper_tangent(left, right, left_index, right_index):
     xlm, ylm = left[left_index]
     xrm, yrm = right[right_index]
@@ -14,13 +18,14 @@ def find_upper_tangent(left, right, left_index, right_index):
     while changed:
         changed = False
         while True:
+            left_visited.add(left_index)
             next_left_index = (left_index - 1) % len(left)
             if next_left_index in left_visited:
                 break
             left_visited.add(next_left_index)
             lx, ly = left[next_left_index]
             new_slope = (yrm - ly) / (xrm - lx)
-            if new_slope < start_slope:
+            if new_slope <= start_slope:
                 start_slope = new_slope
                 xlm, ylm = lx, ly
                 left_index = next_left_index
@@ -29,13 +34,14 @@ def find_upper_tangent(left, right, left_index, right_index):
                 break
 
         while True:
+            right_visited.add(right_index)
             next_right_index = (right_index + 1) % len(right)
             if next_right_index in right_visited:
                 break
             right_visited.add(next_right_index)
             rx, ry = right[next_right_index]
             new_slope = (ry - ylm) / (rx - xlm)
-            if new_slope > start_slope:
+            if new_slope >= start_slope:
                 start_slope = new_slope
                 xrm, yrm = rx, ry
                 right_index = next_right_index
@@ -61,13 +67,14 @@ def find_lower_tangent(left, right, left_index, right_index):
     while changed:
         changed = False
         while True:
+            left_visited.add(left_index)
             next_left_index = (left_index - 1) % len(left)
             if next_left_index in left_visited:
                 break
             left_visited.add(next_left_index)
             lx, ly = left[next_left_index]
             new_slope = (yrm - ly) / (xrm - lx)
-            if new_slope > start_slope:
+            if new_slope >= start_slope:
                 start_slope = new_slope
                 xlm, ylm = lx, ly
                 left_index = next_left_index
@@ -76,13 +83,14 @@ def find_lower_tangent(left, right, left_index, right_index):
                 break
 
         while True:
+            right_visited.add(right_index)
             next_right_index = (right_index + 1) % len(right)
             if next_right_index in right_visited:
                 break
             right_visited.add(next_right_index)
             rx, ry = right[next_right_index]
             new_slope = (ry - ylm) / (rx - xlm)
-            if new_slope < start_slope:
+            if new_slope <= start_slope:
                 start_slope = new_slope
                 xrm, yrm = rx, ry
                 right_index = next_right_index
@@ -100,9 +108,6 @@ def find_extreme_x_indices(left_list, right_list):
 
 
 # Example usage
-left_coords = [(1, 2), (2, 3)]
-right_coords = [(4, 5), (5, 2)]
-
 left_idx, right_idx = find_extreme_x_indices(left_coords, right_coords)
 
 if left_idx is not None and right_idx is not None:
