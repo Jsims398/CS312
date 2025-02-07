@@ -1,6 +1,59 @@
-def find_upper_tangent(left, right, right_index, left_index):
-    xlm, ylm = right[left_index]
-    xrm, yrm = left[right_index]
+
+
+def compute_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    points = sorted(points, key=lambda x: (x[0], x[1]))
+    convex_hull = div_hull(points)
+    return convex_hull
+
+def div_hull(points):
+    points
+    if len(points) <= 2:
+        return points
+    else:
+        mid = len(points) // 2
+        left = points[:mid]
+        right = points[mid:]
+        rightHull = div_hull(right)
+        leftHull = div_hull(left)
+        
+        
+        return combine_hull(leftHull, rightHull)
+    
+    
+def combine_hull(left, right):
+    if (len(left) == 1) and (len(right) == 1):
+        return [left[0], right[0]]
+    else:
+        rightmost_left_index = max(range(len(left)), key=lambda i: left[i][0])
+        leftmost_right_index = min(range(len(right)), key=lambda i: right[i][0])
+
+        upper_tangent = find_upper_tangent(left, right, rightmost_left_index, leftmost_right_index)
+        lower_tangent = find_lower_tangent(left, right, rightmost_left_index, leftmost_right_index)
+
+        upper_right = upper_tangent[1]
+        lower_right = lower_tangent[1]
+        upper_left = upper_tangent[0]
+        lower_left = lower_tangent[0]
+        
+        combined_hull = []
+        currentPoint = lower_left
+        combined_hull.append(left[currentPoint])
+        
+        while currentPoint != upper_left:
+            currentPoint = (currentPoint + 1) % len(left)
+            combined_hull.append(left[currentPoint])
+
+        currentPoint = upper_right
+        combined_hull.append(right[currentPoint])
+        while currentPoint != lower_right:
+            currentPoint = (currentPoint + 1) % len(right)
+            combined_hull.append(right[currentPoint])
+
+        return combined_hull
+
+def find_upper_tangent(left, right, left_index, right_index):
+    xlm, ylm = left[left_index]
+    xrm, yrm = right[right_index]
 
     if xlm == xrm:
         start_slope = float('inf')  # Avoid division by zero (vertical line)
@@ -8,36 +61,48 @@ def find_upper_tangent(left, right, right_index, left_index):
         start_slope = (yrm - ylm) / (xrm - xlm)
 
     changed = True
+    left_visited = set()
+    right_visited = set()
 
     while changed:
         changed = False
-        while left_index - 1 >= 0:
-            rx, ry = right[left_index - 1]
-            new_slope = (ry - yrm) / (rx - xrm)
-            if new_slope < start_slope:
+        while True:
+            left_visited.add(left_index)
+            next_left_index = (left_index - 1) % len(left)
+            if next_left_index in left_visited:
+                break
+            left_visited.add(next_left_index)
+            lx, ly = left[next_left_index]
+            new_slope = (yrm - ly) / (xrm - lx)
+            if new_slope <= start_slope:
                 start_slope = new_slope
-                xlm, ylm = rx, ry
-                left_index -= 1
+                xlm, ylm = lx, ly
+                left_index = next_left_index
                 changed = True
             else:
                 break
 
-        while right_index + 1 < len(left):
-            rlx, rly = left[right_index + 1]
-            new_slope = (ylm - rly) / (xlm - rlx)
-            if new_slope > start_slope:
+        while True:
+            right_visited.add(right_index)
+            next_right_index = (right_index + 1) % len(right)
+            if next_right_index in right_visited:
+                break
+            right_visited.add(next_right_index)
+            rx, ry = right[next_right_index]
+            new_slope = (ry - ylm) / (rx - xlm)
+            if new_slope >= start_slope:
                 start_slope = new_slope
-                xrm, yrm = rlx, rly
-                right_index += 1
+                xrm, yrm = rx, ry
+                right_index = next_right_index
                 changed = True
             else:
                 break
-    return right_index, left_index
+    return left_index, right_index
 
 
-def find_lower_tangent(left, right, right_index, left_index):
-    xlm, ylm = right[left_index]
-    xrm, yrm = left[right_index]
+def find_lower_tangent(left, right, left_index, right_index):
+    xlm, ylm = left[left_index]
+    xrm, yrm = right[right_index]
 
     if xlm == xrm:
         start_slope = float('-inf')  # Avoid division by zero (vertical line)
@@ -45,71 +110,46 @@ def find_lower_tangent(left, right, right_index, left_index):
         start_slope = (yrm - ylm) / (xrm - xlm)
 
     changed = True
+    left_visited = set()
+    right_visited = set()
 
     while changed:
         changed = False
-        while left_index - 1 >= 0:
-            rx, ry = right[left_index - 1]
-            new_slope = (ry - yrm) / (rx - xrm)
-            if new_slope < start_slope:
+        while True:
+            left_visited.add(left_index)
+            next_left_index = (left_index - 1) % len(left)
+            if next_left_index in left_visited:
+                break
+            left_visited.add(next_left_index)
+            lx, ly = left[next_left_index]
+            new_slope = (yrm - ly) / (xrm - lx)
+            if new_slope >= start_slope:
                 start_slope = new_slope
-                xlm, ylm = rx, ry
-                left_index -= 1
+                xlm, ylm = lx, ly
+                left_index = next_left_index
                 changed = True
             else:
                 break
 
-        while right_index + 1 < len(left):
-            rlx, rly = left[right_index + 1]
-            new_slope = (ylm - rly) / (xlm - rlx)
-            if new_slope > start_slope:
+        while True:
+            right_visited.add(right_index)
+            next_right_index = (right_index + 1) % len(right)
+            if next_right_index in right_visited:
+                break
+            right_visited.add(next_right_index)
+            rx, ry = right[next_right_index]
+            new_slope = (ry - ylm) / (rx - xlm)
+            if new_slope <= start_slope:
                 start_slope = new_slope
-                xrm, yrm = rlx, rly
-                right_index += 1
+                xrm, yrm = rx, ry
+                right_index = next_right_index
                 changed = True
             else:
                 break
 
-    return right_index, left_index
+    return left_index, right_index
 
 
-def find_extreme_x_indices(left_list, right_list):
-    rightmost_left_index = max(range(len(left_list)), key=lambda i: left_list[i][0]) if left_list else None
-    leftmost_right_index = min(range(len(right_list)), key=lambda i: right_list[i][0]) if right_list else None
-    return rightmost_left_index, leftmost_right_index
 
-
-# Example usage
-left_coords = [(1, 2), (2, 3)]
-right_coords = [(4, 5), (5, 2)]
-
-left_idx, right_idx = find_extreme_x_indices(left_coords, right_coords)
-
-if left_idx is not None and right_idx is not None:
-    x1, y1 = left_coords[left_idx]
-    x2, y2 = right_coords[right_idx]
-
-    if x1 == x2:
-        print("None")  # Avoid division by zero (vertical line)
-    else:
-        print(f"Slope: {(y2 - y1) / (x2 - x1)}")
-
-    print(f"Rightmost left index: {left_idx}, Coordinate: {left_coords[left_idx]}")
-    print(f"Leftmost right index: {right_idx}, Coordinate: {right_coords[right_idx]}")
-else:
-    print("Invalid input: One of the lists is empty.")
-
-# Fixing the argument order when calling the tangent functions
-upper_tangent = find_upper_tangent(left_coords, right_coords, left_idx, right_idx)
-lower_tangent = find_lower_tangent(left_coords, right_coords, left_idx, right_idx)
-
-print(f"Upper tangent: {upper_tangent}")
-print(f"Lower tangent: {lower_tangent}")
-
-combined_hull = []
-upper_right = upper_tangent[1]
-lower_right = lower_tangent[1]
-upper_left = upper_tangent[0]
-lower_left = lower_tangent[0]
-
-print(f"Upper right: {upper_right}, Lower right: {lower_right}, Upper left: {upper_left}, Lower left: {lower_left}")
+points = [(1, 2), (4, 5), (6, 1), (7, 8), (2, 4), (5, 7), (8, 3), (4, 6), (9, 0), (0, 9)]
+print(compute_hull(points))
