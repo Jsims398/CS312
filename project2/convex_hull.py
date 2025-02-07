@@ -5,7 +5,6 @@
 def compute_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     points = sorted(points, key=lambda x: (x[0], x[1]))
     convex_hull = div_hull(points)
-    # draw_hull(convex_hull)
     return convex_hull
 
 def div_hull(points):
@@ -19,9 +18,7 @@ def div_hull(points):
         rightHull = div_hull(right)
         leftHull = div_hull(left)
         
-        
         return combine_hull(leftHull, rightHull)
-    
     
 def combine_hull(left, right):
     if (len(left) == 1) and (len(right) == 1):
@@ -38,21 +35,33 @@ def combine_hull(left, right):
         upper_left = upper_tangent[0]
         lower_left = lower_tangent[0]
         
-    return left + right
+        combined_hull = []
+        currentPoint = upper_left
+        combined_hull.append(left[currentPoint])
+      
+        currentPoint = upper_right
+        combined_hull.append(right[currentPoint])
+        while currentPoint != lower_right:
+            currentPoint = (currentPoint + 1) % len(right)
+            combined_hull.append(right[currentPoint])
 
-def find_upper_tangent(left, right, leftmost_index, rightmost_index):
-    xlm, ylm = right[leftmost_index]
-    xrm, yrm = left[rightmost_index]
-    # line = (left[leftmost_index], right[rightmost_index])
-    
-    if xlm == xrm:
-        start_slope = 1  # Avoid division by zero (vertical line)
+        if upper_left != lower_left:
+            currentPoint = (lower_left) % len(left)
+            while currentPoint != upper_left:
+                combined_hull.append(left[currentPoint])
+                currentPoint = (currentPoint + 1) % len(left) 
+        return combined_hull
+
+def find_upper_tangent(left, right, left_index, right_index):
+    xl, yl = left[left_index]
+    xr, yr = right[right_index]
+
+    if xl == xr:
+        start_slope = float('inf')
     else:
         start_slope = (yr - yl) / (xr - xl)
 
     changed = True
-    slope_increased = True
-    slope_decreased = True
 
     while changed:
         left_visited = set()
@@ -71,13 +80,18 @@ def find_upper_tangent(left, right, leftmost_index, rightmost_index):
                 xl, yl = lx, ly
                 left_index = next_left_index
                 changed = True
-                slope_increased = True
-        
-        while slope_decreased:
-            slope_decreased = False
-            rlx, rly = left[rightmost_index - 1]
-            new_slope = (ylm-rly) / (xlm-rlx)
-            if new_slope < start_slope:
+            else:
+                break
+
+        while True:
+            right_visited.add(right_index)
+            next_right_index = (right_index + 1) % len(right)
+            if next_right_index in right_visited:
+                break
+            right_visited.add(next_right_index)
+            rx, ry = right[next_right_index]
+            new_slope = (ry - yl) / (rx - xl)
+            if new_slope >= start_slope:
                 start_slope = new_slope
                 xr, yr = rx, ry
                 right_index = next_right_index
@@ -91,14 +105,12 @@ def find_lower_tangent(left, right, left_index, right_index):
     xl, yl = left[left_index]
     xr, yr = right[right_index]
 
-    if xlm == xrm:
-        start_slope = 1  # Avoid division by zero (vertical line)
+    if xl == xr:
+        start_slope = float('-inf') 
     else:
         start_slope = (yr - yl) / (xr - xl)
 
     changed = True
-    slope_increased = True
-    slope_decreased = True
 
     while changed:
         left_visited = set()
@@ -137,11 +149,6 @@ def find_lower_tangent(left, right, left_index, right_index):
                 break
 
     return left_index, right_index
-
-
-
-# points = [(1, 2), (4, 5), (6, 1), (7, 8), (2, 4), (5, 7), (8, 3), (4, 6), (9, 0), (0, 9)]
-# print(compute_hull(points))
 
 # points = [(1, 2), (4, 5), (6, 1), (7, 8), (2, 4), (5, 7), (8, 3), (4, 6), (9, 0), (0, 9)]
 # print(compute_hull(points))
