@@ -1,10 +1,12 @@
 # Uncomment this line to import some functions that can help
 # you debug your algorithm
-# from plotting import draw_line, draw_hull, circle_point
+from plotting import draw_line, draw_hull, circle_point
+
 
 def compute_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
     points = sorted(points, key=lambda x: (x[0], x[1]))
     convex_hull = div_hull(points)
+    draw_hull(convex_hull)
     return convex_hull
 
 def div_hull(points):

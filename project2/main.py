@@ -1,5 +1,6 @@
 import argparse
 from time import time
+import matplotlib.pyplot as plt
 
 from generate import generate_random_points
 from convex_hull import compute_hull
@@ -16,8 +17,8 @@ def main(n: int, distribution: str, seed: int | None):
 
     draw_hull(hull_points)
     title(f'{n} {distribution} points: {round(end - start, 4)} seconds')
-    show_plot()
-
+    # show_plot()
+    return round(end - start, 6)
 
 if __name__ == '__main__':
 
@@ -44,5 +45,35 @@ if __name__ == '__main__':
         import matplotlib.pyplot as plt
         plt.switch_backend('QtAgg')
         plt.ion()
+    
+    times= []
+    ns = [100, 1000]
+    for n in ns:
+        c = main(n, args.dist, args.seed)
+        times.append(c)
+        # plt.clf()
+        # plt.plot(ns, times, 'o')
+        # plt.show()
+    print(times)  
 
-    main(args.n, args.dist, args.seed)
+    ns = [100, 1000]
+
+    for n in ns:
+        # Generate random points
+        points = generate_random_points("uniform", n, None)
+        
+        # Compute the convex hull
+        hull_points = compute_hull(points)
+        
+        # Create a new figure
+        plt.figure(figsize=(8, 6))
+        
+        # Plot the points and the convex hull
+        plot_points(points, c='blue', alpha=0.5)
+        draw_hull(hull_points, color='red', linewidth=2)
+        
+        # Title and display
+        title(f'Convex Hull for {n} Points')
+        plt.show()
+      
+    # main(args.n, args.dist, args.seed)
