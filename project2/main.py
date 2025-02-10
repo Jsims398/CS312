@@ -47,7 +47,7 @@ if __name__ == '__main__':
         plt.ion()
     
     times= []
-    ns = [100, 1000]
+    ns = [10,100, 1000]
     for n in ns:
         c = main(n, args.dist, args.seed)
         times.append(c)
@@ -56,24 +56,24 @@ if __name__ == '__main__':
         # plt.show()
     print(times)  
 
-    ns = [100, 1000]
+    # ns = [100, 1000]
 
-    for n in ns:
-        # Generate random points
-        points = generate_random_points("uniform", n, None)
+    # for n in ns:
+    #     # Generate random points
+    #     points = generate_random_points("uniform", n, None)
         
-        # Compute the convex hull
-        hull_points = compute_hull(points)
+    #     # Compute the convex hull
+    #     hull_points = compute_hull(points)
         
-        # Create a new figure
-        plt.figure(figsize=(8, 6))
+    #     # Create a new figure
+    #     plt.figure(figsize=(8, 6))
         
-        # Plot the points and the convex hull
-        plot_points(points, c='blue', alpha=0.5)
-        draw_hull(hull_points, color='red', linewidth=2)
+    #     # Plot the points and the convex hull
+    #     plot_points(points, c='blue', alpha=0.5)
+    #     draw_hull(hull_points, color='red', linewidth=2)
         
-        # Title and display
-        title(f'Convex Hull for {n} Points')
-        plt.show()
+    #     # Title and display
+    #     title(f'Convex Hull for {n} Points')
+    #     plt.show()
       
     # main(args.n, args.dist, args.seed)
